@@ -1,0 +1,10 @@
+{
+  "CourseName": "English class",
+  "DeviceId": "",
+  "RecordingDirectory": "recordings",
+  "ModelDirectory": "models/sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25",
+  "StabilitySeconds": 1.8,
+  "Theme": "Default",
+  "CloseToTray": false,
+  "ModelThreads": 2
+}

@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0-windows</TargetFramework><OutputType>Exe</OutputType><RuntimeIdentifier>win-x64</RuntimeIdentifier><SelfContained>true</SelfContained></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Recorder.Core/Recorder.Core.csproj"/><PackageReference Include="org.k2fsa.sherpa.onnx" Version="1.13.8"/></ItemGroup>
+</Project>

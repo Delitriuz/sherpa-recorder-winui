@@ -1,0 +1,20 @@
+# 本机依赖、编译与发布产物
+deps/
+artifacts/
+builds/
+**/bin/
+**/obj/
+
+# 用户数据与历史备份
+config/recorder.json
+config/*.tmp
+models/
+logs/
+recordings/
+archives/
+tests/results/
+
+# IDE 本地设置
+.vs/
+*.user
+*.suo
