@@ -13,7 +13,7 @@ internal sealed class NativeTray : IDisposable
         this.window = window; this.show = show; this.stop = stop; this.exit = exit;
         procedure = WindowProcedure;
         if (!SetWindowSubclass(window, procedure, 88, IntPtr.Zero)) throw new InvalidOperationException("托盘窗口注册失败。");
-        data = new NotifyIconData { Size = (uint)Marshal.SizeOf<NotifyIconData>(), Window = window, Id = 1, Flags = 1 | 2 | 4, Callback = Callback, Icon = LoadIconW(IntPtr.Zero, new IntPtr(32512)), Tip = "课堂记录 · WinUI", Info = "", Title = "" };
+        data = new NotifyIconData { Size = (uint)Marshal.SizeOf<NotifyIconData>(), Window = window, Id = 1, Flags = 1 | 2 | 4, Callback = Callback, Icon = LoadIconW(IntPtr.Zero, new IntPtr(32512)), Tip = "课堂记录", Info = "", Title = "" };
         if (!Shell_NotifyIconW(0, ref data)) throw new InvalidOperationException("托盘图标创建失败。");
     }
     private IntPtr WindowProcedure(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam, nuint id, IntPtr reference)

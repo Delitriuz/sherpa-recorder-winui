@@ -43,7 +43,7 @@ public sealed partial class MainWindow : Window
     {
         this.smoke = smoke;
         InitializeComponent();
-        Title = "课堂记录 · WinUI";
+        Title = "课堂记录";
         SystemBackdrop = new MicaBackdrop();
         double scale = GetDpiForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this)) / 96d;
         var workArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary).WorkArea;
@@ -137,7 +137,7 @@ public sealed partial class MainWindow : Window
             if (disposed || recording) return;
             devices.ItemsSource = list;
             devices.SelectedItem = list.FirstOrDefault(device => device.Id == settings.DeviceId);
-            if (devices.SelectedItem is null) { devices.PlaceholderText = "原麦克风不可用，请重新选择"; start.IsEnabled = false; ShowError("已保存的麦克风不在活动设备列表中，请重新选择。"); }
+            if (devices.SelectedItem is null) { devices.PlaceholderText = "原麦克风不可用，请重新选择"; start.IsEnabled = false; ShowError("所选麦克风不可用，请重新选择。"); }
         }
         catch (Exception ex) { ShowError($"麦克风枚举失败：{ex.Message}"); }
     }
@@ -150,9 +150,9 @@ public sealed partial class MainWindow : Window
     private async Task Start()
     {
         if (startPending || recording || !worker.Connected) return;
-        if (lastMessage?.PendingText?.Length > 0) { ShowError("尚有未确认保存的文字，请先另存并核对原记录后再开始。"); return; }
+        if (lastMessage?.PendingText?.Length > 0) { ShowError("有未确认保存的文字，请先另存并核对原文件。"); return; }
         if (devices.SelectedItem is not AudioDevice selected) { ShowError("请先选择可用麦克风。"); return; }
-        if (ProjectPaths.LegacyRecordingActive()) { ShowError("旧版正在录音，请结束本次录音后再使用 WinUI 版。原进程未被操作。"); return; }
+        if (ProjectPaths.LegacyRecordingActive()) { ShowError("另一套录音程序正在运行，请先停止它的录音。"); return; }
         try
         {
             settings.CourseName = string.IsNullOrWhiteSpace(course.Text) ? "English class" : course.Text.Trim(); settings.DeviceId = selected.Id;
@@ -166,7 +166,7 @@ public sealed partial class MainWindow : Window
     {
         if (!recording) return;
         try { if (stopped is null || stopped.Task.IsCompleted) stopped = new(TaskCreationOptions.RunContinuationsAsynchronously); await worker.Send(new("Stop")); await stopped.Task.WaitAsync(TimeSpan.FromSeconds(30)); }
-        catch (Exception ex) { ShowError($"停止请求失败，录音没有被强杀：{ex.Message}"); }
+        catch (Exception ex) { ShowError($"未能确认录音已停止：{ex.Message}"); }
     }
     private async Task RequestClose()
     {
@@ -179,7 +179,7 @@ public sealed partial class MainWindow : Window
             if (recording) { closing = false; return; }
             if (lastMessage?.PendingText?.Length > 0)
             {
-                var dialog = new ContentDialog { XamlRoot = root.XamlRoot, Title = "还有未确认保存的文字", Content = "请先另存并核对原文件。直接退出会丢失工作进程中保留的文字。", PrimaryButtonText = "另存文字", CloseButtonText = "继续保留" };
+                var dialog = new ContentDialog { XamlRoot = root.XamlRoot, Title = "还有未确认保存的文字", Content = "请先另存并核对原文件。直接退出会丢失工作进程中保留的文字。", PrimaryButtonText = "另存文字", CloseButtonText = "返回" };
                 if (await dialog.ShowAsync() == ContentDialogResult.Primary) await Recover();
                 closing = false; return;
             }
@@ -214,7 +214,7 @@ public sealed partial class MainWindow : Window
         stop.IsEnabled = recording && message.State != "Stopping";
         course.IsEnabled = devices.IsEnabled = stability.IsEnabled = !recording;
         loading.IsActive = message.State is "Preparing" or "Loading"; loading.Visibility = loading.IsActive ? Visibility.Visible : Visibility.Collapsed;
-        status.Text = message.State switch { "Preparing" => "正在加载模型…", "Loading" => "正在启动录音…", "Recording" => "正在记录", "Stopping" => "正在保存尾句…", "Stopped" => "已停止并保存", "Error" => message.ModelReady ? "记录失败" : "模型加载失败", _ => "准备就绪" };
+        status.Text = message.State switch { "Preparing" => "正在加载模型…", "Loading" => "正在启动录音…", "Recording" => "正在记录", "Stopping" => "正在保存…", "Stopped" => "已停止并保存", "Error" => message.ModelReady ? "记录失败" : "模型加载失败", _ => "准备就绪" };
         var duration = TimeSpan.FromSeconds(message.AudioSeconds); elapsed.Text = $"{(int)duration.TotalHours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
         if (message.Type == "Level") volume.Value = message.Level;
         if (message.Sentences is not null)
@@ -225,13 +225,13 @@ public sealed partial class MainWindow : Window
         savedCount.Text = $"{sentences.Count} 句";
         emptyRecord.Visibility = sentences.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         if (message.Sentences is not null && followLatest && sentences.Count > 0) finalList.ScrollIntoView(sentences[^1]);
-        if (message.Type == "Snapshot" && message.Text.Length == 0) { partial.Text = recording ? "正在聆听…" : "准备好后，开始记录这堂课。"; partialHeading.Text = "实时识别 · 成句后自动保存"; }
-        if (message.Type == "Partial" || message.Type == "Snapshot" && message.Text.Length > 0 && message.State != "Error") { partial.Text = message.Text; partialHeading.Text = "实时识别 · 正在整理"; DispatcherQueue.TryEnqueue(() => partialScroll.ChangeView(null, partialScroll.ScrollableHeight, null, true)); }
-        if (message.Type == "Final" && sentences.Count > 0) { partial.Text = sentences[^1].Text; partialHeading.Text = "实时识别 · 此句已保存"; }
-        if (message.State == "Preparing") { partial.Text = "正在准备识别，加载完成后即可开始。"; partialHeading.Text = "加载模型 · 尚未录音"; }
-        if (message.Type == "ModelReady") { partial.Text = "准备好后，开始记录这堂课。"; partialHeading.Text = "实时识别 · 成句后自动保存"; }
+        if (message.Type == "Snapshot" && message.Text.Length == 0) { partial.Text = recording ? "等待讲话…" : "点击“开始记录”开始录音。"; partialHeading.Text = "实时识别 · 自动保存完整句子"; }
+        if (message.Type == "Partial" || message.Type == "Snapshot" && message.Text.Length > 0 && message.State != "Error") { partial.Text = message.Text; partialHeading.Text = "实时识别 · 尚未保存"; DispatcherQueue.TryEnqueue(() => partialScroll.ChangeView(null, partialScroll.ScrollableHeight, null, true)); }
+        if (message.Type == "Final" && sentences.Count > 0) { partial.Text = sentences[^1].Text; partialHeading.Text = "此句已保存"; }
+        if (message.State == "Preparing") { partial.Text = "模型加载完成后可开始录音。"; partialHeading.Text = "加载模型 · 尚未录音"; }
+        if (message.Type == "ModelReady") { partial.Text = "点击“开始记录”开始录音。"; partialHeading.Text = "实时识别 · 自动保存完整句子"; }
         if (message.State == "Loading") { partial.Text = "正在启动麦克风…"; partialHeading.Text = "实时识别 · 等待讲话"; }
-        file.Text = message.FilePath.Length > 0 ? Path.GetFileName(message.FilePath) : "每次课堂会自动保存一份文本记录";
+        file.Text = message.FilePath.Length > 0 ? Path.GetFileName(message.FilePath) : "每次录音保存为独立文本文件";
         ToolTipService.SetToolTip(file, message.FilePath.Length > 0 ? message.FilePath : file.Text);
         openFile.IsEnabled = message.FilePath.Length > 0 && File.Exists(message.FilePath);
         recover.Visibility = message.PendingText?.Length > 0 && message.State == "Error" ? Visibility.Visible : Visibility.Collapsed;
@@ -264,7 +264,7 @@ public sealed partial class MainWindow : Window
     }
     private void OpenFolder() { try { string directory = ProjectPaths.Resolve(settings.RecordingDirectory); Directory.CreateDirectory(directory); Open(directory); } catch (Exception ex) { ShowError(ex.Message); } }
     public void ShowWindow() { DispatcherQueue.TryEnqueue(() => { AppWindow.Show(); Activate(); }); }
-    private void ShowError(string text) { info.Severity = InfoBarSeverity.Error; info.Title = "需要处理"; info.Message = text; info.IsOpen = true; }
+    private void ShowError(string text) { info.Severity = InfoBarSeverity.Error; info.Title = "错误"; info.Message = text; info.IsOpen = true; }
     private void NotifyError(string text)
     {
         if (!notificationsAvailable) return;

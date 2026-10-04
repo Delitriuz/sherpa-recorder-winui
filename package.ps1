@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$Version = 'v1.0.0',
+    [string]$Version = 'v1.0.1',
     [string]$ModelDirectory = (Join-Path $PSScriptRoot 'models\sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25')
 )
 $ErrorActionPreference = 'Stop'
