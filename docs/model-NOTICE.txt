@@ -1,0 +1,13 @@
+Licensed by NVIDIA Corporation under the NVIDIA Open Model License
+
+Model: NVIDIA Nemotron Speech Streaming English 0.6B
+Original model: https://huggingface.co/nvidia/nemotron-speech-streaming-en-0.6b
+License: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/
+
+This distribution includes the 1120 ms INT8 ONNX export supplied by sherpa-onnx:
+sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25
+Source: https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25.tar.bz2
+
+The exported model files are redistributed unchanged. The application's MIT
+license does not apply to the model. A copy of the NVIDIA Open Model License
+Agreement is provided alongside this notice.

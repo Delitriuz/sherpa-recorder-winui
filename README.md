@@ -2,6 +2,8 @@
 
 基于 WinUI 3 与 sherpa-onnx 的 Windows x64 离线英语课堂记录应用。直接采集麦克风，不使用 Windows 实时字幕或云端服务。
 
+[下载 Windows x64 发布包](https://github.com/Delitriuz/sherpa-recorder-winui/releases/latest) · [首次运行说明](docs/release-notes.md) · [MIT 许可证](LICENSE)
+
 ## 使用
 
 1. 运行 `start.ps1`，或双击 `builds/winui-v3/Recorder.App.exe`。
@@ -31,6 +33,8 @@
 
 脚本只更新当前发布目录，运行中拒绝覆盖。依赖与 CLI 缓存全部保存在项目内。用户配置为 `config/recorder.json`，默认示例为 `config/recorder.example.json`。
 
+构建后运行 `./package.ps1 -Version v1.0.0` 可生成带模型的完整发布 ZIP 与 SHA-256 校验文件，输出位于 `artifacts/releases`。模型默认取自项目 `models`，也可用 `-ModelDirectory` 指定已下载的模型目录；仅复制识别所需文件，不包含个人配置或课堂数据。第三方许可按锁定来源下载至项目缓存，再随包分发。
+
 | 目录 | 内容 |
 | --- | --- |
 | `src/Recorder.App` | WinUI 界面、托盘和工作进程连接 |
@@ -46,9 +50,13 @@
 
 ## 模型与验证
 
-默认使用项目 `models` 下的 Nemotron INT8 模型。可通过配置的 `ModelDirectory` 指向其他位置；模型相对路径须只含英文字符，项目根目录可含中文。源码仓库不包含模型或预编译 EXE，需要先下载模型并构建。
+默认使用项目 `models` 下的 Nemotron INT8 模型。可通过配置的 `ModelDirectory` 指向其他位置；模型相对路径须只含英文字符，项目根目录可含中文。源码仓库不包含模型或预编译 EXE；Release 的完整 ZIP 已包含应用、运行库和模型，解压即可使用，无需单独下载模型。
 
 - [架构与接口](docs/architecture.md)
 - [锁定依赖与模型来源](docs/dependencies.md)
 - [验证结果与已知限制](docs/validation.md)
 - [运行测试](tests/README.md)
+
+## 许可
+
+本项目源码采用 [MIT](LICENSE)。第三方运行库、模型和测试素材不受本项目 MIT 许可证覆盖，详见 [第三方声明](docs/third-party-notices.md)。
