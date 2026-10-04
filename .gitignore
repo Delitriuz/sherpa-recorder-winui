@@ -2,10 +2,11 @@
 deps/
 artifacts/
 builds/
+dist/
 **/bin/
 **/obj/
 
-# 用户数据与历史备份
+# 用户数据与本地文件
 config/recorder.json
 config/*.tmp
 models/

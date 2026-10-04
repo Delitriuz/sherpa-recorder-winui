@@ -19,8 +19,8 @@ dotnet artifacts/bin/Recorder.Tests/Release/net8.0-windows/win-x64/Recorder.Test
 
 - 测试程序加 `--capture-probe`：实际采集默认麦克风约 3 秒，检查采样格式。
 - 加 `--recording-probe`：不可写目录失败、两次实际录音复用模型、停止脚本及 UTF-8 尾部保存。仅在不录课时运行。
-- `builds/winui-v3/Recorder.App.exe --smoke-test`：真实 XAML、加载状态、实时修订、重复结果、错误恢复、设置与历史；生成七张预览，不打开麦克风、不改变配置。
-- `builds/winui-v3/Recorder.App.exe --desktop-test`：正常入口自动加载模型、托盘、第二实例重定向及正常退出，不打开麦克风。
+- `dist/Recorder/Recorder.App.exe --smoke-test`：真实 XAML、加载状态、实时修订、重复结果、错误恢复、设置与历史；生成七张预览，不打开麦克风、不改变配置。
+- `dist/Recorder/Recorder.App.exe --desktop-test`：正常入口自动加载模型、托盘、第二实例重定向及正常退出，不打开麦克风。
 - `./test-model.ps1`：默认回放本项目同句两遍素材；用 `-WaveFile` 指定外部 WAV，`-Realtime` 实时回放。
 - `./tests/tail-silence.ps1`：生成长静默后单次讲话的 WAV，检查静默和无额外尾静音的收尾。
 

@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
-$output = Join-Path $projectRoot 'builds\winui-v3'
+$output = Join-Path $projectRoot 'dist\Recorder'
 $running = @(Get-Process -Name Recorder.App,Recorder.Worker -ErrorAction SilentlyContinue | Where-Object { -not $_.Path -or $_.Path.StartsWith($output + '\', [System.StringComparison]::OrdinalIgnoreCase) })
 if ($running.Count) { throw '请先正常关闭课堂记录应用，再更新当前版本。' }
 $env:DOTNET_CLI_HOME = Join-Path $projectRoot 'deps\dotnet-home'

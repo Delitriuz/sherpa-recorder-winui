@@ -28,4 +28,4 @@
 - 模型允许修订未提交文字，但没有独立语法纠错或强制标点。
 - 通知点击激活、Explorer 重启后的托盘恢复未纳入验证。
 
-原始证据保存在本地 `tests/results`，不纳入源码交付：`core-tests.txt`、`ui-v3/ui-smoke.txt`、`ui-v3/desktop-test.txt`、`ui-v3/desktop-close.txt`、`ten-minute-verification.txt`、`resource-samples.csv` 和 `tail-silence-verification.txt`。运行日志位于 `logs`。
+原始证据保存在本地 `tests/results`，不纳入源码交付：`core-tests.txt`、`ui/ui-smoke.txt`、`ui/desktop-test.txt`、`ten-minute-verification.txt`、`resource-samples.csv` 和 `tail-silence-verification.txt`。运行日志位于 `logs`。

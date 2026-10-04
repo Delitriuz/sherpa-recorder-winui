@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$Version = 'v1.0.1',
+    [string]$Version = 'v1.0.0',
     [string]$ModelDirectory = (Join-Path $PSScriptRoot 'models\sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25')
 )
 $ErrorActionPreference = 'Stop'
@@ -10,7 +10,7 @@ $null = New-Item -ItemType Directory -Path $output -Force
 $zip = Join-Path $output "sherpa-recorder-winui-$Version-full-win-x64.zip"
 if (Test-Path -LiteralPath $zip) { throw "发布包已存在，请先保留或移走它：$zip" }
 $stage = Join-Path $output ("stage-" + [Guid]::NewGuid().ToString('N'))
-$app = Join-Path $projectRoot 'builds\winui-v3'
+$app = Join-Path $projectRoot 'dist\Recorder'
 if (-not (Test-Path -LiteralPath (Join-Path $app 'worker\Recorder.Worker.exe'))) { throw '请先运行 build.ps1。' }
 $ModelDirectory = (Resolve-Path -LiteralPath $ModelDirectory).Path
 $modelFiles = @('encoder.int8.onnx','decoder.int8.onnx','joiner.int8.onnx','tokens.txt')
@@ -36,10 +36,10 @@ foreach ($item in $sources.GetEnumerator()) {
     $target = Join-Path $licenseCache $item.Key
     if (-not (Test-Path -LiteralPath $target)) { Invoke-WebRequest -Uri $item.Value -OutFile $target }
 }
-$null = New-Item -ItemType Directory -Path (Join-Path $stage 'builds\winui-v3') -Force
+$null = New-Item -ItemType Directory -Path (Join-Path $stage 'dist\Recorder') -Force
 foreach ($file in Get-ChildItem -LiteralPath $app -Recurse -File | Where-Object { $_.Extension -ne '.pdb' }) {
     $relative = $file.FullName.Substring($app.Length + 1)
-    $target = Join-Path $stage ("builds\winui-v3\" + $relative)
+    $target = Join-Path $stage ("dist\Recorder\" + $relative)
     $null = New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force
     Copy-Item -LiteralPath $file.FullName -Destination $target
 }

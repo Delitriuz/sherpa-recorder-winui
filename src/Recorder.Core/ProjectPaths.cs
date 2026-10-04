@@ -18,11 +18,11 @@ public static class ProjectPaths
         File.WriteAllText(temporary, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
         File.Move(temporary, Config, true);
     }
-    public static bool LegacyRecordingActive()
+    public static bool OtherRecorderActive()
     {
-        string legacy = Path.GetFullPath(Path.Combine(Root, "..", "sherpa-recorder"));
-        var paths = new List<string> { Path.Combine(legacy, "run", "recorder.pid") };
-        string builds = Path.Combine(legacy, "builds");
+        string otherRecorder = Path.GetFullPath(Path.Combine(Root, "..", "sherpa-recorder"));
+        var paths = new List<string> { Path.Combine(otherRecorder, "run", "recorder.pid") };
+        string builds = Path.Combine(otherRecorder, "builds");
         if (Directory.Exists(builds)) paths.AddRange(Directory.GetDirectories(builds).Select(directory => Path.Combine(directory, "run", "recorder.pid")));
         foreach (string path in paths)
         {

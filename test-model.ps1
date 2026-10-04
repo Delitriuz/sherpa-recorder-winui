@@ -1,6 +1,6 @@
 ﻿param([string]$WaveFile = (Join-Path $PSScriptRoot 'tests\fixtures\same-sentence-twice.wav'), [switch]$Realtime)
 $ErrorActionPreference = 'Stop'
-$exe = Join-Path $PSScriptRoot 'builds\winui-v3\worker\Recorder.Worker.exe'
+$exe = Join-Path $PSScriptRoot 'dist\Recorder\worker\Recorder.Worker.exe'
 $wavePath = (Resolve-Path -LiteralPath $WaveFile).Path
 $arguments = @('--test-wav', $wavePath)
 if ($Realtime) { $arguments += '--realtime' }

@@ -24,8 +24,8 @@ internal static class Program
             await foreach (AudioChunk chunk in source.Reader.ReadAllAsync()) samples += chunk.Samples.Length;
             Require(samples > 16000, "WAV 音频读取"); reports.Add($"PASS WAV source; samples={samples}");
         }
-        bool legacyActive = ProjectPaths.LegacyRecordingActive();
-        if (args.Contains("--capture-probe") && !legacyActive)
+        bool otherRecorderActive = ProjectPaths.OtherRecorderActive();
+        if (args.Contains("--capture-probe") && !otherRecorderActive)
         {
             using var capture = new NativeAudioCapture("");
             await capture.StartAsync().WaitAsync(TimeSpan.FromSeconds(10));
@@ -40,7 +40,7 @@ internal static class Program
             reports.Add($"PASS native WASAPI capture and Windows sample conversion; float32 mono 16000Hz; samples={received}");
         }
         {
-            string exe = ProjectPaths.Resolve("builds/winui-v3/worker/Recorder.Worker.exe");
+            string exe = ProjectPaths.Resolve("dist/Recorder/worker/Recorder.Worker.exe");
             string records = ProjectPaths.Resolve(ProjectPaths.Load().RecordingDirectory);
             int before = Directory.Exists(records) ? Directory.GetFiles(records, "*.txt").Length : 0;
             var startup = Stopwatch.StartNew();
@@ -60,7 +60,7 @@ internal static class Program
                 reports.Add($"PASS startup preload and inference warmup before Start; model loads=1; no recording file; initialization={startup.Elapsed.TotalSeconds:F2}s");
                 var invalid = new Settings { ModelDirectory = "tests/intentionally-missing-model" };
                 await writer.WriteLineAsync(JsonSerializer.Serialize(new Command("Start", invalid)));
-                Message blocked = await Read(reader, "Error"); Require(blocked.Text.Contains(legacyActive ? "已有版本" : "缺少模型"), "采集前保护或模型失败状态");
+                Message blocked = await Read(reader, "Error"); Require(blocked.Text.Contains(otherRecorderActive ? "其他录音程序" : "缺少模型"), "采集前保护或模型失败状态");
                 await using (var secondary = new NamedPipeClientStream(".", ProjectPaths.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly))
                 {
                     await secondary.ConnectAsync(10000);
@@ -79,18 +79,18 @@ internal static class Program
                 await pipe.ConnectAsync(10000);
                 using var reader = new StreamReader(pipe, Encoding.UTF8, false, 4096, true);
                 using var writer = new StreamWriter(pipe, new UTF8Encoding(false), 4096, true) { AutoFlush = true };
-                Message restored = await Read(reader, "Snapshot"); Require(restored.State == "Error" && restored.Text.Contains(legacyActive ? "已有版本" : "缺少模型"), "重连恢复状态");
+                Message restored = await Read(reader, "Snapshot"); Require(restored.State == "Error" && restored.Text.Contains(otherRecorderActive ? "其他录音程序" : "缺少模型"), "重连恢复状态");
                 await writer.WriteLineAsync(JsonSerializer.Serialize(new Command("Quit")));
                 await Read(reader, "Quit");
             }
             await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(10)); Require(process.ExitCode == 0, $"工作进程正常退出：{await workerError}");
-            if (legacyActive) Require(ProjectPaths.LegacyRecordingActive(), "旧版录音保持运行");
+            if (otherRecorderActive) Require(ProjectPaths.OtherRecorderActive(), "其他录音程序保持运行");
             reports.Add("PASS IPC snapshot, concurrent clients, reconnect, single worker, failure reporting and graceful worker exit; model preloaded, capture not started");
         }
         Directory.CreateDirectory(ProjectPaths.Resolve("tests/results"));
-        if (args.Contains("--recording-probe") && !legacyActive)
+        if (args.Contains("--recording-probe") && !otherRecorderActive)
         {
-            string exe = ProjectPaths.Resolve("builds/winui-v3/worker/Recorder.Worker.exe");
+            string exe = ProjectPaths.Resolve("dist/Recorder/worker/Recorder.Worker.exe");
             using Process worker = Process.Start(new ProcessStartInfo(exe) { WorkingDirectory = ProjectPaths.Root, UseShellExecute = false, CreateNoWindow = true })!;
             await using var pipe = new NamedPipeClientStream(".", ProjectPaths.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
             await pipe.ConnectAsync(10000);

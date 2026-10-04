@@ -1,6 +1,6 @@
-# v1.0.1
+# v1.0.0
 
-本次调整界面提示和使用说明，识别与保存逻辑不变。发布包仍包含应用、运行库和 Nemotron INT8 模型。
+Windows x64 离线英语课堂记录应用。完整包包含程序、运行库和 Nemotron INT8 模型。
 
 - 原生 WinUI 3 界面、实时文字、历史文件、主题设置和系统托盘。
 - 打开应用自动加载并预热模型；停止录音后复用模型。
@@ -10,7 +10,7 @@
 
 ## 下载与运行
 
-下载 `sherpa-recorder-winui-v1.0.1-full-win-x64.zip`，完整解压到可写目录，不要直接从 ZIP 中运行 EXE。Windows 11 x64；无需安装 .NET 或 Windows App SDK，也无需另行下载模型。
+下载 `sherpa-recorder-winui-v1.0.0-full-win-x64.zip`，完整解压到可写目录，不要直接从 ZIP 中运行 EXE。Windows 11 x64；无需安装 .NET 或 Windows App SDK，也无需另行下载模型。
 
 ZIP 已包含 [Nemotron INT8 官方模型](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25.tar.bz2)，四个识别文件位于：
 
@@ -22,7 +22,7 @@ models/sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25/
   tokens.txt
 ```
 
-双击 `builds/winui-v3/Recorder.App.exe` 或运行 `start.ps1`。待模型加载完成后开始记录；使用“停止并保存”或 `stop.ps1` 停止录音并保存。默认记录位于 `recordings`。
+双击 `dist/Recorder/Recorder.App.exe` 或运行 `start.ps1`。待模型加载完成后开始记录；使用“停止并保存”或 `stop.ps1` 停止录音并保存。默认记录位于 `recordings`。
 
 包内使用默认配置，不包含开发者的麦克风 ID、个人设置、日志或课堂记录。首次使用请允许麦克风访问。应用未做代码签名，Windows 可能显示安全提示；请核对下载来源和 `SHA256SUMS.txt`，不建议关闭系统安全保护。
 

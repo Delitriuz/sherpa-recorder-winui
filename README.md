@@ -6,7 +6,7 @@
 
 ## 使用
 
-1. 运行 `start.ps1`，或双击 `builds/winui-v3/Recorder.App.exe`。
+1. 运行 `start.ps1`，或双击 `dist/Recorder/Recorder.App.exe`。
 2. 应用自动加载并预热模型；完成后，填写课程名称、选择麦克风，点击“开始记录”。
 3. 实时区显示尚在修订的文字；下方列表只显示已写入磁盘的句子。
 4. 点击“停止并保存”停止录音并保存，也可运行 `stop.ps1`。下一次开始会复用已加载模型。
@@ -33,7 +33,7 @@
 
 脚本只更新当前发布目录，运行中拒绝覆盖。依赖与 CLI 缓存全部保存在项目内。用户配置为 `config/recorder.json`，默认示例为 `config/recorder.example.json`。
 
-构建后运行 `./package.ps1 -Version v1.0.1` 可生成带模型的完整发布 ZIP 与 SHA-256 校验文件，输出位于 `artifacts/releases`。模型默认取自项目 `models`，也可用 `-ModelDirectory` 指定已下载的模型目录；仅复制识别所需文件，不包含个人配置或课堂数据。第三方许可按锁定来源下载至项目缓存，再随包分发。
+构建后运行 `./package.ps1 -Version v1.0.0` 可生成带模型的完整发布 ZIP 与 SHA-256 校验文件，输出位于 `artifacts/releases`。模型默认取自项目 `models`，也可用 `-ModelDirectory` 指定已下载的模型目录；仅复制识别所需文件，不包含个人配置或课堂数据。第三方许可按锁定来源下载至项目缓存，再随包分发。
 
 | 目录 | 内容 |
 | --- | --- |
@@ -43,10 +43,10 @@
 | `config` | 配置示例和本机配置 |
 | `tests` | 验证程序、测试素材与运行结果 |
 | `docs` | 架构、依赖来源和验收范围 |
-| `deps`、`artifacts`、`builds` | 本地依赖、编译缓存和发布产物 |
+| `deps`、`artifacts`、`dist` | 本地依赖、编译缓存和发布产物 |
 | `logs`、`recordings` | 运行日志和课堂记录 |
 
-源码交付不包含用户数据、模型、构建缓存或历史备份，排除规则见 `.gitignore`。当前发布目录沿用既有路径，启动入口无需变更。
+源码交付不包含用户数据、模型或构建产物，排除规则见 `.gitignore`。
 
 ## 模型与验证
 

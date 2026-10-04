@@ -169,7 +169,7 @@ internal sealed class RecorderServer : IDisposable
         try
         {
             try { owned = captureMutex.WaitOne(0); } catch (AbandonedMutexException) { owned = true; }
-            if (!owned || ProjectPaths.LegacyRecordingActive()) throw new InvalidOperationException("已有版本正在录音，请结束该次录音后再开始。原进程未被操作。");
+            if (!owned || ProjectPaths.OtherRecorderActive()) throw new InvalidOperationException("其他录音程序正在运行，请先停止它的录音。");
             lock (gate) { session = Guid.NewGuid().ToString("N"); state = "Loading"; partial = error = pending = path = ""; audioSeconds = 0; sentences.Clear(); }
             Send("State");
             Directory.CreateDirectory(ProjectPaths.Resolve("logs"));

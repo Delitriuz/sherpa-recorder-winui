@@ -152,7 +152,7 @@ public sealed partial class MainWindow : Window
         if (startPending || recording || !worker.Connected) return;
         if (lastMessage?.PendingText?.Length > 0) { ShowError("有未确认保存的文字，请先另存并核对原文件。"); return; }
         if (devices.SelectedItem is not AudioDevice selected) { ShowError("请先选择可用麦克风。"); return; }
-        if (ProjectPaths.LegacyRecordingActive()) { ShowError("另一套录音程序正在运行，请先停止它的录音。"); return; }
+        if (ProjectPaths.OtherRecorderActive()) { ShowError("另一套录音程序正在运行，请先停止它的录音。"); return; }
         try
         {
             settings.CourseName = string.IsNullOrWhiteSpace(course.Text) ? "English class" : course.Text.Trim(); settings.DeviceId = selected.Id;
@@ -204,7 +204,7 @@ public sealed partial class MainWindow : Window
         if (message.Sequence <= lastSequence && message.SessionId == currentSession) return;
         if (message.SessionId != currentSession)
         {
-            if (currentSession.Length > 0 && message.SessionId.Length == 0) ShowError("记录服务已重新启动。之前保存的文本可在历史中查看，请确认后重新开始。");
+            if (currentSession.Length > 0 && message.SessionId.Length == 0) ShowError("记录服务已重新启动。已保存的文本可在历史中查看，请确认后重新开始。");
             sentences.Clear(); currentSession = message.SessionId; stopped = null; followLatest = true;
         }
         lastSequence = message.Sequence; lastMessage = message;
@@ -305,7 +305,7 @@ public sealed partial class MainWindow : Window
             using var testWatcher = new DeviceWatcher();
             AppWindow.Hide(); AppWindow.Show();
             if (devices.Items.Count == 0) throw new InvalidOperationException("原生设备枚举没有返回结果。");
-            Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui-v3"));
+            Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui"));
             root.RequestedTheme = ElementTheme.Light;
             Update(new("Snapshot", "", 1, "Preparing"));
             if (start.IsEnabled || stop.Visibility != Visibility.Collapsed || !loading.IsActive) throw new InvalidOperationException("启动预加载状态错误地允许录音。");
@@ -318,7 +318,7 @@ public sealed partial class MainWindow : Window
             Update(new("Partial", "smoke", 4, "Recording", "This sentence is still being corrected.", AudioSeconds: 19));
             if (sentences.Count != 2 || partial.Text != "This sentence is still being corrected.") throw new InvalidOperationException("消息去重或实时更新失败。");
             if (start.Visibility != Visibility.Collapsed || stop.Visibility != Visibility.Visible || !stop.IsEnabled) throw new InvalidOperationException("录音状态未切换到停止操作。");
-            Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui-v3"));
+            Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui"));
             root.RequestedTheme = ElementTheme.Light;
             await CapturePreview("record-light.png");
             root.RequestedTheme = ElementTheme.Dark;
@@ -340,9 +340,9 @@ public sealed partial class MainWindow : Window
             nint hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             bool perMonitor = AreDpiAwarenessContextsEqual(GetWindowDpiAwarenessContext(hwnd), new nint(-4));
             if (!perMonitor) throw new InvalidOperationException("窗口没有使用 PerMonitorV2 DPI awareness。");
-            File.WriteAllText(ProjectPaths.Resolve("tests/results/ui-v3/ui-smoke.txt"), $"PASS native XAML, tray, notifications, live revisions, 2 repeated finals, stopped state, compact error recovery visible, settings/history navigation. DPI PerMonitorV2={perMonitor}; WindowDpi={GetDpiForWindow(hwnd)}; RasterizationScale={root.XamlRoot.RasterizationScale}; default=780x640 DIP; minimum=600x560 DIP. No worker or microphone started; configuration not changed.");
+            File.WriteAllText(ProjectPaths.Resolve("tests/results/ui/ui-smoke.txt"), $"PASS native XAML, tray, notifications, live revisions, 2 repeated finals, stopped state, compact error recovery visible, settings/history navigation. DPI PerMonitorV2={perMonitor}; WindowDpi={GetDpiForWindow(hwnd)}; RasterizationScale={root.XamlRoot.RasterizationScale}; default=780x640 DIP; minimum=600x560 DIP. No worker or microphone started; configuration not changed.");
         }
-        catch (Exception ex) { Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui-v3")); File.WriteAllText(ProjectPaths.Resolve("tests/results/ui-v3/ui-smoke.txt"), ex.ToString()); }
+        catch (Exception ex) { Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui")); File.WriteAllText(ProjectPaths.Resolve("tests/results/ui/ui-smoke.txt"), ex.ToString()); }
         finally { recording = false; allowClose = true; Close(); }
     }
     private async Task CapturePreview(string name)
@@ -350,7 +350,7 @@ public sealed partial class MainWindow : Window
         await Task.Delay(500);
         var bitmap = new RenderTargetBitmap(); await bitmap.RenderAsync(root);
         byte[] pixels = (await bitmap.GetPixelsAsync()).ToArray();
-        StorageFolder results = await StorageFolder.GetFolderFromPathAsync(ProjectPaths.Resolve("tests/results/ui-v3"));
+        StorageFolder results = await StorageFolder.GetFolderFromPathAsync(ProjectPaths.Resolve("tests/results/ui"));
         StorageFile output = await results.CreateFileAsync(name, CreationCollisionOption.ReplaceExisting);
         using var stream = await output.OpenAsync(FileAccessMode.ReadWrite);
         var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
@@ -358,8 +358,8 @@ public sealed partial class MainWindow : Window
     }
     private async Task RunDesktopTest()
     {
-        Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui-v3"));
-        string report = ProjectPaths.Resolve("tests/results/ui-v3/desktop-test.txt");
+        Directory.CreateDirectory(ProjectPaths.Resolve("tests/results/ui"));
+        string report = ProjectPaths.Resolve("tests/results/ui/desktop-test.txt");
         try
         {
             for (int i = 0; i < 600 && (!worker.Connected || lastMessage?.ModelReady != true); i++) await Task.Delay(100);
